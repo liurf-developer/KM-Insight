@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KM Insight — UKM Knowledge Operations Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══════ LOADING OVERLAY ═══════ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Initializing KM Insight Dashboard...</div>
+</div>
+
+<!-- ═══════ TOP BAR ═══════ -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="icon-box">UKM</div>
+    KM Insight
+    <span class="tagline">Knowledge Operations Dashboard</span>
+  </div>
+  <div class="topbar-right">
+    <button class="topbar-btn" title="Notifications" id="notifBtn">
+      🔔<div class="badge-pip">3</div>
+    </button>
+    <button class="topbar-btn" title="Settings">⚙️</button>
+    <div class="user-chip">
+      <div class="avatar">KO</div>
+      KM Operator
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ SIDEBAR ═══════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">Overview</div>
+  <div class="sidebar-item active" data-page="executive">
+    <span class="icon">📊</span> Executive Overview
+    <span class="nav-arrow">›</span>
+  </div>
+
+  <div class="sidebar-section">Knowledge Management</div>
+  <div class="sidebar-item" data-page="lifecycle">
+    <span class="icon">🔄</span> Content Lifecycle
+    <span class="nav-arrow">›</span>
+  </div>
+  <div class="sidebar-item" data-page="contributors">
+    <span class="icon">👥</span> Contributor Center
+    <span class="nav-arrow">›</span>
+  </div>
+  <div class="sidebar-item" data-page="governance">
+    <span class="icon">🛡️</span> Governance Health
+    <span class="nav-arrow">›</span>
+  </div>
+  <div class="sidebar-item" data-page="taxonomy">
+    <span class="icon">🗂️</span> Taxonomy Explorer
+    <span class="nav-arrow">›</span>
+  </div>
+
+  <div class="sidebar-section">Consumption &amp; Feedback</div>
+  <div class="sidebar-item" data-page="portal">
+    <span class="icon">🌐</span> Portal Usage
+    <span class="nav-arrow">›</span>
+  </div>
+  <div class="sidebar-item" data-page="search">
+    <span class="icon">🔍</span> Search Analytics
+    <span class="nav-arrow">›</span>
+  </div>
+  <div class="sidebar-item" data-page="channel">
+    <span class="icon">📡</span> Channel Consumption
+    <span class="nav-arrow">›</span>
+  </div>
+  <div class="sidebar-item" data-page="badcase">
+    <span class="icon">⚠️</span> Bad Case &amp; Tasks
+    <span class="nav-arrow">›</span>
+  </div>
+
+  <div class="sidebar-section">Deep Dive</div>
+  <div class="sidebar-item" data-page="article">
+    <span class="icon">📄</span> Article Deep Dive
+    <span class="nav-arrow">›</span>
+  </div>
+
+  <div class="sidebar-section">Tools</div>
+  <div class="sidebar-item" data-page="reports">
+    <span class="icon">📋</span> Reports &amp; Export
+    <span class="nav-arrow">›</span>
+  </div>
+</nav>
+
+<!-- ═══════ MAIN CONTENT ═══════ -->
+<main class="main">
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <span class="filter-label">Time</span>
+    <select class="filter-select" data-filter="timeRange"><option value="7d">Last 7 Days</option><option value="30d" selected>Last 30 Days</option><option value="90d">Last Quarter</option><option value="365d">Last Year</option></select>
+
+    <span class="filter-label">Product</span>
+    <select class="filter-select" data-filter="product"><option value="All">All Products</option><option value="ISG">ISG</option><option value="IDG">IDG</option><option value="MBG">MBG</option></select>
+
+    <span class="filter-label">Topic</span>
+    <select class="filter-select" data-filter="topic"><option value="All">All Topics</option><option value="Technical Knowledge">Technical Knowledge</option><option value="SOP">SOP</option><option value="How-To">How-To</option><option value="Product Knowledge">Product Knowledge</option></select>
+
+    <span class="filter-label">Location</span>
+    <select class="filter-select" data-filter="location"><option value="All">All Locations</option><option value="NA">North America</option><option value="EMEA">EMEA</option><option value="AP">Asia Pacific</option><option value="LA">Latin America</option></select>
+
+    <span class="filter-label">Service</span>
+    <select class="filter-select" data-filter="service"><option value="All">All Offerings</option><option value="Premier Support">Premier Support</option><option value="Standard Warranty">Standard Warranty</option><option value="Premium Care">Premium Care</option></select>
+
+    <button class="filter-reset" id="filterReset" disabled>Reset Filters</button>
+  </div>
+
+  <!-- ═══════ PAGE: Executive Overview ═══════ -->
+  <div class="page-panel active" id="page-executive">
+    <div class="page-header">
+      <div class="page-title">Executive Overview</div>
+      <div class="page-subtitle">At-a-glance health snapshot for leadership and KM operations · Last 30 Days</div>
+    </div>
+
+    <div class="kpi-row cols-4" id="execKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Consumption by Topic</div><span class="card-badge blue">Distribution</span></div>
+        <div class="chart-wrap"><canvas id="execTopicDonut"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Daily View Trend</div><span class="card-badge blue">30-Day</span></div>
+        <div class="chart-wrap"><canvas id="execViewTrend"></canvas></div>
+        <div class="tooltip-row"><span><span class="tooltip-dot" style="background:#1A56DB"></span>Total Views</span><span><span class="tooltip-dot" style="background:#93C5FD;border:2px dashed #1A56DB"></span>Unique Visitors</span></div>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2-1">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Top Contributors</div><span class="card-badge green">This Month</span></div>
+        <table class="data-table" id="execContribTable"></table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Active Alerts</div><span class="card-badge red">Requires Attention</span></div>
+        <div class="alert-list" id="execAlerts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Content Lifecycle ═══════ -->
+  <div class="page-panel" id="page-lifecycle">
+    <div class="page-header">
+      <div class="page-title">Content Lifecycle</div>
+      <div class="page-subtitle">Monitor knowledge assets through lifecycle stages, SLA tracking, and governance health</div>
+    </div>
+    <div class="kpi-row cols-5" id="lcKPIs"></div>
+
+    <div class="chart-row cols-1">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Monthly Lifecycle Distribution</div><span class="card-badge blue">12-Month Trend</span></div>
+        <div class="chart-wrap"><canvas id="lcStackedBar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Draft Aging Analysis</div><span class="card-badge amber">Stale &gt;60d in Red</span></div>
+        <div class="chart-wrap"><canvas id="lcDraftAging"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Approval Timeline</div><span class="card-badge blue">Avg Days per Stage</span></div>
+        <div class="chart-wrap"><canvas id="lcApprovalTimeline"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Expiring &amp; Orphaned Articles</div><button class="btn btn-outline btn-sm">Export CSV</button></div>
+      <table class="data-table" id="lcExpiringTable"></table>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Contributor Center ═══════ -->
+  <div class="page-panel" id="page-contributors">
+    <div class="page-header">
+      <div class="page-title">Contributor Center</div>
+      <div class="page-subtitle">Track contributor productivity, quality, and review cycle performance</div>
+    </div>
+    <div class="kpi-row cols-4" id="contribKPIs"></div>
+
+    <div class="chart-row cols-2-1">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Contributor Leaderboard</div><span class="card-badge green">Top 10</span></div>
+        <table class="data-table" id="contribLeaderboard"></table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Activity</div><span class="card-badge blue">Live</span></div>
+        <div class="alert-list" id="contribActivity"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Contributor Quality Matrix</div><span class="card-badge blue">Views vs. Helpful%</span></div>
+      <div class="chart-wrap"><canvas id="contribScatter"></canvas></div>
+      <div class="tooltip-row"><span><span class="tooltip-dot" style="background:var(--blue-600)"></span>Target Zone: High Views + High Quality</span><span>Bubble size = Article count</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Governance Health ═══════ -->
+  <div class="page-panel" id="page-governance">
+    <div class="page-header">
+      <div class="page-title">Governance Health</div>
+      <div class="page-subtitle">Monitor content quality, broken links, metadata compliance, and taxonomy hygiene</div>
+    </div>
+    <div class="kpi-row cols-4" id="govKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Broken Links Trend</div><span class="card-badge red">6-Month</span></div>
+        <div class="chart-wrap"><canvas id="govBrokenTrend"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Orphaned Articles by Topic</div><span class="card-badge amber">Zero Views &gt;180d</span></div>
+        <div class="chart-wrap"><canvas id="govOrphanedBar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Unused Tags <small style="font-weight:400;color:var(--gray-400);">(Last 180 Days)</small></div><button class="btn btn-outline btn-sm">Manage Tags</button></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;" id="govUnusedTags"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Taxonomy Explorer ═══════ -->
+  <div class="page-panel" id="page-taxonomy">
+    <div class="page-header">
+      <div class="page-title">Taxonomy Explorer</div>
+      <div class="page-subtitle">Visualize taxonomy hierarchy coverage, distribution, and identify content gaps</div>
+    </div>
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Taxonomy Hierarchy</div><span class="card-badge blue">5 Dimensions</span></div>
+        <div id="taxTree" style="font-size:13px;line-height:1.8;font-family:var(--font-mono);color:var(--gray-700);"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Articles per Product Family</div><span class="card-badge blue">Ranking</span></div>
+        <div class="chart-wrap"><canvas id="taxTreemap"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Low Coverage Nodes</div><span class="card-badge amber">Needs Attention</span></div>
+        <div class="alert-list" id="taxLowCoverage"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Taxonomy Gaps</div><span class="card-badge red">Zero Articles, Active Search</span></div>
+        <div class="alert-list" id="taxGaps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Portal Usage ═══════ -->
+  <div class="page-panel" id="page-portal">
+    <div class="page-header">
+      <div class="page-title">Portal Usage</div>
+      <div class="page-subtitle">Track UKM Portal consumption — views, visitors, engagement, and geographic distribution</div>
+    </div>
+    <div class="kpi-row cols-5" id="portalKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Daily Views &amp; Visitors</div><span class="card-badge blue">30-Day</span></div>
+        <div class="chart-wrap"><canvas id="portalDailyView"></canvas></div>
+        <div class="tooltip-row"><span><span class="tooltip-dot" style="background:var(--blue-600)"></span>Total Views</span><span><span class="tooltip-dot" style="background:var(--blue-300);border:2px dashed var(--blue-400)"></span>Unique Visitors</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Views by Product (Top 10)</div><span class="card-badge blue">Ranking</span></div>
+        <div class="chart-wrap"><canvas id="portalProductBar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Views by Region</div><span class="card-badge blue">Geographic</span></div>
+        <div class="chart-wrap"><canvas id="portalRegionBar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Views by Device Type</div><span class="card-badge blue">Platform</span></div>
+        <div class="chart-wrap"><canvas id="portalDeviceDonut"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Search Analytics ═══════ -->
+  <div class="page-panel" id="page-search">
+    <div class="page-header">
+      <div class="page-title">Search Analytics</div>
+      <div class="page-subtitle">Analyze search behavior, identify knowledge gaps, and monitor search effectiveness</div>
+    </div>
+    <div class="kpi-row cols-4" id="searchKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Search Funnel</div><span class="card-badge blue">Conversion: ~40%</span></div>
+        <div class="chart-wrap"><canvas id="searchFunnel"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Top Search Terms</div><span class="card-badge blue">By Volume</span></div>
+        <div class="chart-wrap"><canvas id="searchTopTerms"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Zero-Result Search Terms</div><span class="card-badge red">Action Required</span></div>
+      <table class="data-table" id="searchZeroResult"></table>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Channel Consumption ═══════ -->
+  <div class="page-panel" id="page-channel">
+    <div class="page-header">
+      <div class="page-title">Channel Consumption</div>
+      <div class="page-subtitle">Monitor knowledge consumption across downstream channels — Super Agent, PD Guide, NBA, LENA</div>
+    </div>
+    <div class="kpi-row cols-5" id="channelKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Consumption by Channel</div><span class="card-badge blue">Distribution</span></div>
+        <div class="chart-wrap"><canvas id="chanDonut"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Channel Trend (6 Months)</div><span class="card-badge blue">Growth</span></div>
+        <div class="chart-wrap"><canvas id="chanTrend"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Content Type Distribution by Channel</div><span class="card-badge blue">Stacked View</span></div>
+      <div class="chart-wrap"><canvas id="chanStackedBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Bad Case & Tasks ═══════ -->
+  <div class="page-panel" id="page-badcase">
+    <div class="page-header">
+      <div class="page-title">Bad Case &amp; Optimization Tasks</div>
+      <div class="page-subtitle">Track feedback-driven optimization tasks, Bad Case analysis, and improvement closed-loop</div>
+    </div>
+    <div class="kpi-row cols-5" id="bcKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tasks by Type</div><span class="card-badge blue">Categorization</span></div>
+        <div class="chart-wrap"><canvas id="bcTaskTypeDonut"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Bad Case by Source</div><span class="card-badge amber">Root Cause</span></div>
+        <div class="chart-wrap"><canvas id="bcSourceBar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Bad Case Tasks — Requires Action</div><button class="btn btn-primary btn-sm">+ New Task</button></div>
+      <table class="data-table" id="bcTaskTable"></table>
+    </div>
+
+    <div class="chart-row cols-1" style="margin-top:22px;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Task Status Breakdown</div><span class="card-badge blue">Current Sprint</span></div>
+        <div class="chart-wrap"><canvas id="bcStatusBar"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Article Deep Dive ═══════ -->
+  <div class="page-panel" id="page-article">
+    <div class="page-header">
+      <div class="page-title">Article Deep Dive</div>
+      <div class="page-subtitle">Single-article analytics — UX behavior, scroll depth, feedback, and cross-linking</div>
+    </div>
+
+    <div class="card" style="margin-bottom:22px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
+        <div>
+          <div style="font-size:19px;font-weight:700;color:var(--gray-900);">Troubleshooting ThinkVision R34W-30 Screen Flickering</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-top:7px;display:flex;gap:18px;flex-wrap:wrap;">
+            <span>🖥️ IDG &gt; THINKVISION &gt; VIS R SERIES</span>
+            <span>🔧 Hardware &gt; Display &gt; LCD</span>
+            <span>📌 Published · Owner: Zhang*</span>
+            <span>🕐 Updated: 2026-05-15</span>
+          </div>
+        </div>
+        <button class="btn btn-outline">Open in Content Editor →</button>
+      </div>
+    </div>
+
+    <div class="kpi-row cols-6" id="articleKPIs"></div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Scroll Depth Analysis</div><span class="card-badge amber">Major drop-off at 75%</span></div>
+        <div class="chart-wrap"><canvas id="adScrollDepth"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Daily Views</div><span class="card-badge blue">30-Day Trend</span></div>
+        <div class="chart-wrap"><canvas id="adDailyViews"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Cross-linking Flow</div><span class="card-badge blue">Click-out destinations</span></div>
+        <div class="chart-wrap"><canvas id="adCrosslinkBar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Feedback Summary &amp; Version History</div><span class="card-badge blue">Details</span></div>
+        <div style="font-size:12.5px;color:var(--gray-600);line-height:1.7;">
+          <div style="margin-bottom:12px;"><strong style="color:var(--green-600);">Helpful: 1,062 (88.5%)</strong> · <strong style="color:var(--red-500);">Not Helpful: 138 (11.5%)</strong></div>
+          <div style="font-size:11px;color:var(--gray-400);text-transform:uppercase;font-weight:700;letter-spacing:0.5px;">Top "Not Helpful" Reasons:</div>
+          <div style="margin:7px 0;">· Steps unclear (42) &nbsp;· Didn't solve issue (38)</div>
+          <div>· Missing details (35) &nbsp;· Wrong product (23)</div>
+          <hr style="border:0;border-top:1px solid var(--gray-100);margin:14px 0;">
+          <div style="font-size:11px;color:var(--gray-400);text-transform:uppercase;font-weight:700;letter-spacing:0.5px;">Version History:</div>
+          <div style="margin-top:6px;"><span class="mono" style="font-weight:600;">v3.2</span> · 2026-05-15 · Zhang* · Updated troubleshooting</div>
+          <div><span class="mono" style="font-weight:600;">v3.1</span> · 2026-04-02 · Li · Added video attachment</div>
+          <div><span class="mono" style="font-weight:600;">v3.0</span> · 2026-03-10 · Zhang* · Initial publish</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: Reports & Export ═══════ -->
+  <div class="page-panel" id="page-reports">
+    <div class="page-header">
+      <div class="page-title">Reports &amp; Export</div>
+      <div class="page-subtitle">Scheduled and ad-hoc report generation, data export, and subscription management</div>
+    </div>
+
+    <div class="card" style="margin-bottom:22px;">
+      <div class="card-header"><div class="card-title">Scheduled Reports</div><button class="btn btn-primary btn-sm">+ New Schedule</button></div>
+      <table class="data-table" id="reportsScheduled"></table>
+    </div>
+
+    <div class="chart-row cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Ad-hoc Export</div><span class="card-badge blue">On Demand</span></div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <select class="filter-select" style="width:100%;"><option>Executive Overview Summary</option><option>Portal Usage Report</option><option>Search Analytics Report</option><option>Content Lifecycle Report</option><option>Contributor Performance</option><option>Channel Consumption</option><option>Bad Case Summary</option></select>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm">CSV</button>
+            <button class="btn btn-outline btn-sm">XLSX</button>
+            <button class="btn btn-outline btn-sm">PDF</button>
+            <button class="btn btn-outline btn-sm">PNG (Charts)</button>
+          </div>
+          <div style="font-size:11.5px;color:var(--gray-400);margin-top:4px;">📡 Data also available via API for Power BI / Adobe Analytics integration</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Subscription Management</div><span class="card-badge green">Active: 12</span></div>
+        <div style="font-size:13px;color:var(--gray-600);line-height:2;">
+          <div>📧 <strong>Weekly Usage Summary</strong> — Mon 8AM · 8 recipients</div>
+          <div>📧 <strong>Monthly Content Health</strong> — 1st of month · 5 recipients</div>
+          <div>📧 <strong>Broken Link Alert</strong> — Fri 9AM · 3 recipients</div>
+          <div>📧 <strong>Zero-Result Digest</strong> — Wed 10AM · 4 recipients</div>
+          <div style="margin-top:14px;"><button class="btn btn-outline btn-sm">Manage Recipients</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<script src="js/data.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
